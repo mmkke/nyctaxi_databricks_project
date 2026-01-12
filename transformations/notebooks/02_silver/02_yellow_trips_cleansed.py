@@ -9,7 +9,7 @@
 
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-from pyspark.sql.functions import col, when, timestamp_diff, max, min
+from pyspark.sql.functions import col, when, max, min
 
 # COMMAND ----------
 

@@ -10,14 +10,14 @@
 
 # COMMAND ----------
 
+import os
 import sys
 
-PROJECT_ROOT = "/Workspace/Shared/nyctaxi_project"
+PROJECT_ROOT = os.path.abspath(os.path.join(os.getcwd(), "../../../../"))
 
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 from utils.table_checks import assert_table_exists
-
 from pyspark.sql.functions import current_timestamp
 
 # COMMAND ----------

@@ -28,6 +28,11 @@ def get_widget(name: str, default: str) -> str:
         print(f"[WARN] Failed to read widget '{name}' ({e}). Using default: {default}")
         return default
 
+def get_date_n_months_ago(n, format="%Y-%m") -> str:
+    """
+    Return the date `n` months ago in the given format.
+    """
+    return (datetime.today() - relativedelta(months=n)).strftime(format)
 
 def parse_month_yyyy_mm(month_str: str) -> date:
     """

@@ -7,15 +7,20 @@
 import os
 import urllib.request
 import shutil
+import sys
 
+PROJECT_ROOT = os.path.abspath(os.path.join(os.getcwd(), "../.."))
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.append(PROJECT_ROOT)
+from utils.functions import get_date_n_months_ago
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 # COMMAND ----------
 
 # Get date of download for two months previous
-two_months_ago = datetime.now() - relativedelta(months=2)
-yyyy_dd = two_months_ago.strftime("%Y-%m")
+yyyy_mm = get_date_n_months_ago(n=2)
 
 # Define dir path
 dir_path = f"/Volumes/nyctaxi/00_landing/data_sources/nyctaxi_yellow/{yyyy_dd}"
