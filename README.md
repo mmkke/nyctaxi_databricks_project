@@ -72,45 +72,45 @@ Both pipelines are implemented as **Databricks Jobs** and are designed to be **i
 
 ## Repository Structure
 
-nyc-taxi-databricks/
-├── ad_hoc/
-│   ├── yellow_taxi_eda.py
-│   └── yellow_taxi_eda2.py
+nyc-taxi-databricks/  
+├── ad_hoc/  
+│   ├── yellow_taxi_eda.py  
+│   └── yellow_taxi_eda2.py  
+│  
+├── one_off/  
+│   └── initial_load/notebooks/  
+│       ├── 01_bronze/  
+│       │   └── 01_yellow_trips_raw.py  
+│       ├── 02_silver/  
+│       │   ├── 01_taxi_zone_lookup.py  
+│       │   ├── 02_yellow_trips_cleansed.py  
+│       │   └── 03_yellow_trips_enriched.py  
+│       ├── 03_gold/  
+│       │   └── daily_trips_summary.py  
+│       ├── backfill_historical_yellow_trips.py  
+│       ├── creating_catalogs_schema_volume.py  
+│       └── load_taxi_zone_lookup.py  
 │
-├── one_off/
-│   └── initial_load/notebooks/
-│       ├── 01_bronze/
-│       │   └── 01_yellow_trips_raw.py
-│       ├── 02_silver/
-│       │   ├── 01_taxi_zone_lookup.py
-│       │   ├── 02_yellow_trips_cleansed.py
-│       │   └── 03_yellow_trips_enriched.py
-│       ├── 03_gold/
-│       │   └── daily_trips_summary.py
-│       ├── backfill_historical_yellow_trips.py
-│       ├── creating_catalogs_schema_volume.py
-│       └── load_taxi_zone_lookup.py
-│
-├── transformations/notebooks/
-│   ├── 00_landing/
-│   │   ├── ingest_lookup.py
-│   │   └── ingest_yellow_trips.py
-│   ├── 01_bronze/
-│   │   └── 01_yellow_trips_raw.py
-│   ├── 02_silver/
-│   │   ├── 01_taxi_zone_lookup.py
-│   │   ├── 02_yellow_trips_cleansed.py
-│   │   └── 03_yellow_trips_enriched.py
-│   └── 03_gold/
-│       └── daily_trips_summary.py
-│
-├── utils/
-│   ├── init.py
-│   ├── functions.py
-│   └── table_checks.py
-│
-├── README.md
-└── project_architecture.png
+├── transformations/notebooks/  
+│   ├── 00_landing/  
+│   │   ├── ingest_lookup.py  
+│   │   └── ingest_yellow_trips.py   
+│   ├── 01_bronze/  
+│   │   └── 01_yellow_trips_raw.py  
+│   ├── 02_silver/  
+│   │   ├── 01_taxi_zone_lookup.py  
+│   │   ├── 02_yellow_trips_cleansed.py  
+│   │   └── 03_yellow_trips_enriched.py  
+│   └── 03_gold/  
+│       └── daily_trips_summary.py  
+│  
+├── utils/  
+│   ├── init.py  
+│   ├── functions.py  
+│   └── table_checks.py  
+│  
+├── README.md  
+└── project_architecture.png  
 
 
 ### Directory Highlights
@@ -126,27 +126,6 @@ nyc-taxi-databricks/
 
 - **ad_hoc/**  
   Exploratory analysis and experimentation notebooks.
-
----  
-
-## Databricks Jobs  
-
-### Yellow Taxi Initial Load
-
-The **Yellow Taxi Initial Load** job performs a full historical backfill of NYC TLC Yellow Taxi trip data and populates the **Bronze, Silver, and Gold** layers of the platform.
-
-The job is parameterized by `end_month` and `prev_months`, allowing flexible reprocessing across arbitrary date ranges. It orchestrates a sequence of dependent tasks to download raw data, ingest it into Delta Lake, apply cleansing and enrichment logic, implement **SCD Type 2** modeling for taxi zone reference data, and generate analytics-ready Gold aggregates.
-
-This job is designed to be **idempotent**, safely re-runnable, and is intended for initial platform setup or historical reprocessing. It sources all notebooks directly from GitHub and runs as a performance-optimized Databricks Job.
-
-### Yellow Taxi Monthly Load
-
-The **Yellow Taxi Monthly Load** job incrementally processes newly released NYC TLC Yellow Taxi data on a scheduled basis, keeping the platform up to date with minimal compute usage.
-
-The job ingests new raw trip and lookup data into the Landing layer, conditionally propagates changes downstream, applies **SCD Type 2** updates to taxi zone reference data, and incrementally updates the Bronze, Silver, and Gold layers. Conditional tasks ensure downstream processing only occurs when new data is detected, making the pipeline efficient and fault-tolerant.
-
-This job is designed for **automated monthly execution**, supports idempotent re-runs, and sources all notebooks directly from GitHub. It serves as the ongoing ingestion mechanism following the initial historical backfill.
-
 
 ---
 
