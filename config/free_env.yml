@@ -1,0 +1,51 @@
+# Databricks Free / Learners Edition (no Unity Catalog)
+env_name: free
+
+platform:
+  use_unity_catalog: false
+
+naming:
+  base_name: nyctaxi
+  # In free edition, model layers as separate databases:
+  # nyctaxi_bronze, nyctaxi_silver, nyctaxi_gold
+  bronze_db: nyctaxi_bronze
+  silver_db: nyctaxi_silver
+  gold_db: nyctaxi_gold
+  lookup_db: nyctaxi_silver
+
+storage:
+  # Free edition does not support UC volumes or cloud external locations.
+  # Use DBFS paths for landing/staging.
+  landing_path: "dbfs:/tmp/nyctaxi/landing"
+  checkpoints_path: "dbfs:/tmp/nyctaxi/checkpoints"
+  exports_path: "dbfs:/tmp/nyctaxi/exports"
+
+ingestion:
+  # Used by your backfill / monthly logic
+  dataset: yellow
+  file_format: parquet
+  partition_col: "year_month"   # you can compute this from pickup datetime if needed
+  overwrite_landing: false
+
+tables:
+  # Canonical table names (resolved to fully-qualified using naming.*)
+  bronze_trips: yellow_trips_raw
+  silver_trips_cleansed: yellow_trips_cleansed
+  silver_trips_enriched: yellow_trips_enriched
+  silver_zone_dim: taxi_zone_lookup_scd2
+  gold_daily_summary: daily_trips_summary
+
+scd2:
+  enabled: true
+  key_cols: ["location_id"]
+  compare_cols: ["borough", "zone", "service_zone"]
+  effective_col: "effective_date"
+  end_col: "end_date"
+  current_flag_col: "is_current"
+  open_end_date: "9999-12-31"
+
+run:
+  # reasonable defaults for demo runs
+  default_end_month: "2025-10"
+  default_prev_months: 3
+  demo_mode: true
