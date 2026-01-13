@@ -68,50 +68,6 @@ Two primary workflows drive the platform:
 
 Both pipelines are implemented as **Databricks Jobs** and are designed to be **idempotent and fault-tolerant**.
 
----
-
-## Repository Structure
-
-nyc-taxi-databricks/  
-├── ad_hoc/  
-│   ├── yellow_taxi_eda.py  
-│   └── yellow_taxi_eda2.py  
-│  
-├── one_off/  
-│   └── initial_load/notebooks/  
-│       ├── 01_bronze/  
-│       │   └── 01_yellow_trips_raw.py  
-│       ├── 02_silver/  
-│       │   ├── 01_taxi_zone_lookup.py  
-│       │   ├── 02_yellow_trips_cleansed.py  
-│       │   └── 03_yellow_trips_enriched.py  
-│       ├── 03_gold/  
-│       │   └── daily_trips_summary.py  
-│       ├── backfill_historical_yellow_trips.py  
-│       ├── creating_catalogs_schema_volume.py  
-│       └── load_taxi_zone_lookup.py  
-│
-├── transformations/notebooks/  
-│   ├── 00_landing/  
-│   │   ├── ingest_lookup.py  
-│   │   └── ingest_yellow_trips.py   
-│   ├── 01_bronze/  
-│   │   └── 01_yellow_trips_raw.py  
-│   ├── 02_silver/  
-│   │   ├── 01_taxi_zone_lookup.py  
-│   │   ├── 02_yellow_trips_cleansed.py  
-│   │   └── 03_yellow_trips_enriched.py  
-│   └── 03_gold/  
-│       └── daily_trips_summary.py  
-│  
-├── utils/  
-│   ├── init.py  
-│   ├── functions.py  
-│   └── table_checks.py  
-│  
-├── README.md  
-└── project_architecture.png  
-
 
 ### Directory Highlights
 
@@ -149,15 +105,6 @@ nyc-taxi-databricks/
 - **Maintainability**: Clear separation of concerns across layers
 - **Governance**: Unity Catalog–managed storage and schemas
 - **Analytics Readiness**: Gold tables optimized for BI and downstream consumers
-
----
-
-## Potential Extensions
-
-- Data quality validation and anomaly detection
-- BI dashboards (Tableau / Power BI)
-- Cost and performance monitoring
-- Demand forecasting or anomaly detection models built on Gold tables
 
 ---
 
