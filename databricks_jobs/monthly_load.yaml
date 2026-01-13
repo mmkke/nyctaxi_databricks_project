@@ -1,0 +1,79 @@
+resources:
+  jobs:
+    Yellow_Taxi_Monthly_Load:
+      name: Yellow Taxi Monthly Load
+      description: "Uploads new data to YellowTaxi project every month as data becomes
+        available. "
+      schedule:
+        quartz_cron_expression: 34 0 0 2 * ?
+        timezone_id: America/New_York
+        pause_status: PAUSED
+      tasks:
+        - task_key: 00_ingest_lookup
+          notebook_task:
+            notebook_path: transformations/notebooks/00_landing/ingest_lookup.py
+            source: GIT
+        - task_key: 00_ingest_yellow_trips
+          notebook_task:
+            notebook_path: transformations/notebooks/00_landing/ingest_yellow_trips.py
+            source: GIT
+          environment_key: 00_ingest_yellow_trips_environment
+        - task_key: continue_downstream_lookup
+          depends_on:
+            - task_key: 00_ingest_lookup
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.00_ingest_lookup.values.continue_downstream}}"
+            right: yes
+        - task_key: 02_taxi_zone_lookup_SCD2
+          depends_on:
+            - task_key: continue_downstream_lookup
+              outcome: "true"
+          notebook_task:
+            notebook_path: transformations/notebooks/02_silver/01_taxi_zone_lookup.py
+            source: GIT
+        - task_key: continue_downstream_yellow_trips
+          depends_on:
+            - task_key: 00_ingest_yellow_trips
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.00_ingest_yellow_trips.values.continue_downstream}}"
+            right: yes
+        - task_key: 01_yellow_trips_raw
+          depends_on:
+            - task_key: continue_downstream_yellow_trips
+              outcome: "true"
+          notebook_task:
+            notebook_path: transformations/notebooks/01_bronze/01_yellow_trips_raw.py
+            source: GIT
+        - task_key: 02_yellow_trips_cleansed
+          depends_on:
+            - task_key: 01_yellow_trips_raw
+            - task_key: 02_taxi_zone_lookup_SCD2
+          run_if: AT_LEAST_ONE_SUCCESS
+          notebook_task:
+            notebook_path: transformations/notebooks/02_silver/02_yellow_trips_cleansed.py
+            source: GIT
+        - task_key: 02_yellow_trips_enriched
+          depends_on:
+            - task_key: 02_yellow_trips_cleansed
+          notebook_task:
+            notebook_path: transformations/notebooks/02_silver/03_yellow_trips_enriched.py
+            source: GIT
+        - task_key: 03_daily_trips_summary
+          depends_on:
+            - task_key: 02_yellow_trips_enriched
+          notebook_task:
+            notebook_path: transformations/notebooks/03_gold/daily_trips_summary.py
+            source: GIT
+      git_source:
+        git_url: https://github.com/mmkke/nyctaxi_databricks_project.git
+        git_provider: gitHub
+        git_branch: main
+      queue:
+        enabled: true
+      environments:
+        - environment_key: 00_ingest_yellow_trips_environment
+          spec:
+            environment_version: "4"
+      performance_target: PERFORMANCE_OPTIMIZED
